@@ -1,0 +1,57 @@
+# Centered Text Boxes with Dark Theme
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centered Text Boxes</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 10px 0;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        textarea {
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            resize: none;
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+        textarea:focus {
+            outline: none;
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <textarea rows="10" placeholder="Input Box 1"></textarea>
+    </div>
+    <div class="container">
+        <textarea rows="3" placeholder="Output Box"></textarea>
+    </div>
+    <div class="container">
+        <textarea rows="4" placeholder="Input Box 2"></textarea>
+    </div>
+
+</body>
+</html>
