@@ -1,57 +1,132 @@
-# Centered Text Boxes with Dark Theme
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centered Text Boxes</title>
+    <title>EZRegex IDE</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #121212;
+            background-color: #1e1e1e;
             color: #ffffff;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2e2e2e;
+        }
+        header img {
+            height: 40px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .button {
+            background-color: #007acc;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            margin-left: 5px;
+            cursor: pointer;
+            border-radius: 5px;
         }
         .container {
-            width: 80%;
-            margin: 10px 0;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            height: calc(100vh - 60px);
         }
-        textarea {
-            width: 100%;
-            border: none;
-            border-radius: 4px;
+        .text-area {
+            width: 48%;
             padding: 10px;
+            background-color: #2e2e2e;
+            border: 1px solid #444;
             resize: none;
-            background-color: #2a2a2a;
             color: #ffffff;
         }
-        textarea:focus {
-            outline: none;
-            background-color: #333333;
+        .tabular {
+            width: 48%;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .tabs {
+            display: flex;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .tab {
+            background-color: #444;
+            padding: 10px;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #007acc;
+        }
+        .output-area {
+            width: 100%;
+            padding: 10px;
+            display: none;
+
+            font-size: 12px;
+
+        }
+        .output-area.active {
+            display: block;
         }
     </style>
 </head>
 <body>
+    <header>
+        <img src="icon.png" alt="EZRegex Icon">
+        <h1>EZRegex</h1>
+        <div>
+            <button class="button" onclick="parse('')">Run</button>
+            <button class="button">Build</button>
+            <button class="button" onclick="tokenise()">Test</button>
+            <button class="button">Scratch</button>
+            <button class="button">Save</button>
+            <button class="button">Load</button>
+        </div>
+    </header>
+    <div class="container">
+        <textarea id="source" class="text-area" placeholder="Write your regex here..."></textarea>
+        <div class="tabular">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('console')">Console</div>
+                <div class="tab" onclick="switchTab('scratch')">Scratch</div>
+            </div>
+            <div id="console" class="output-area active">Console Output<br></div>
+            <div id="scratch" class="output-area">Scratch Output</div>
+        </div>
+    </div>
+    <script type="text/javascript" src="./src/tokens.js"></script>
+    <script type="text/javascript" src="./src/ast.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.output-area').forEach(div => {
+                div.classList.remove('active');
+            });
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.tab').forEach(tabElement => {
+                tabElement.classList.remove('active');
+            });
+            document.querySelector(".tab[onclick=\"switchTab('${tab}')\"]").classList.add('active');
+        }
 
-    <div class="container">
-        <textarea rows="10" placeholder="Input Box 1"></textarea>
-    </div>
-    <div class="container">
-        <textarea rows="3" placeholder="Output Box"></textarea>
-    </div>
-    <div class="container">
-        <textarea rows="4" placeholder="Input Box 2"></textarea>
-    </div>
+        function consoleWrite(text) {
 
+            inner = document.getElementById("console").innerHTML;
+
+            inner = inner + text + "<br>"
+
+            document.getElementById("console").innerHTML = inner;
+
+            
+        }
+    </script>
 </body>
 </html>
