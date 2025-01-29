@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZRegex</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .input-box, .output-box {
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            resize: none;
+        }
+        .output-container {
+            display: flex;
+            justify-content: space-between;
+            resize: none;
+        }
+        .output-box {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .output-box:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="icon.png" alt="EZR Icon">
+            <h1>EZRegex</h1>
+        </div>
+        <textarea class="input-box" rows="10" placeholder="Enter your regex here..."></textarea>
+        <div class="output-container">
+            <textarea class="output-box" rows="3" placeholder="Output..."></textarea>
+            <div class="output-box" rows="4"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -15,15 +15,13 @@ const RIGHT_PARENTHESIS = 12;
 const STRING_QUOTE = 13;
 const SECTION = 14;
 
-const END_OF_STATEMENT = 99;
-
-function tokenise() {
-	// Get code
-	source = document.getElementById("source").value;
+function tokenise(source) {
 
 	tokens = []
 
-	type = ""
+	rows = []
+
+	type = -1
 
 	token = ""
 
@@ -31,7 +29,7 @@ function tokenise() {
 
 	function send_token() {
 
-		if (token == "" && type == "") {
+		if (token == "" && type == -1) {
 			return
 		}
 
@@ -48,7 +46,7 @@ function tokenise() {
 
 
 		tokens.push([type, token]);
-		type = ""
+		type = -1
 		token = ""
 	}
 
@@ -118,6 +116,8 @@ function tokenise() {
 			} else if (char == "\n" || char == "\r" || char == "\t" || char == " ") {
 				send_token();
 			} else if (char.charCodeAt(0) >= "0".charCodeAt(0) && char.charCodeAt(0) <= "9".charCodeAt(0)) {
+				console.log("HERE")	
+				console.log("type: " + type)
 				if (type == INTEGER || type == IDENTIFIER) {
 					token += char;
 				} else {
@@ -177,12 +177,13 @@ function tokenise() {
 
 		send_token();
 
-		type = END_OF_STATEMENT;
-		send_token();
+		if (tokens.length != 0) {
+			rows.push(tokens);
+			tokens = []
+		}
 	}
 
+	return rows
 
-	for (pair of tokens) {
-		consoleWrite(pair[0] + ": " + pair[1])
-	}
+	
 }

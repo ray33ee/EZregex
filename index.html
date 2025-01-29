@@ -84,9 +84,9 @@
         <img src="icon.png" alt="EZRegex Icon">
         <h1>EZRegex</h1>
         <div>
-            <button class="button" onclick="parse('')">Run</button>
-            <button class="button">Build</button>
-            <button class="button" onclick="tokenise()">Test</button>
+            <button class="button">Run</button>
+            <button class="button" onclick="build()">Build</button>
+            <button class="button">Test</button>
             <button class="button">Scratch</button>
             <button class="button">Save</button>
             <button class="button">Load</button>
@@ -103,8 +103,15 @@
             <div id="scratch" class="output-area">Scratch Output</div>
         </div>
     </div>
-    <script type="text/javascript" src="./src/tokens.js"></script>
-    <script type="text/javascript" src="./src/ast.js"></script>
+    <script type="text/javascript" src="./src/compiler/tokens.js"></script>
+    <script type="text/javascript" src="./src/compiler/ast.js"></script>
+    <script type="text/javascript" src="./src/compiler.js"></script>
+    <script type="text/javascript" src="./src/compiler/symbols.js"></script>
+    <script type="text/javascript" src="./src/compiler/ir.js"></script>
+    <script type="text/javascript" src="./src/compiler/semantics.js"></script>
+    <script type="text/javascript" src="./src/compiler/optimiser.js"></script>
+    <script type="text/javascript" src="./src/compiler/generate.js"></script>
+    <script type="text/javascript" src="./src/compiler/preprocess.js"></script>
     <script>
         function switchTab(tab) {
             document.querySelectorAll('.output-area').forEach(div => {

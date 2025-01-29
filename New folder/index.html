@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZRegex</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            margin: 10px 0;
+            border: 1px solid #111;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            max-width: 600px;
+        }
+        .area {
+            width: 100%;
+            max-width: 800px;
+            height: 200px;
+        }
+        .side-by-side {
+            display: flex;
+            justify-content: space-between;
+            resize: none;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            resize: none;
+            box-sizing: border-box;
+        }
+        #regexInput {
+            height: 200px;
+        }
+        .highlight-all {
+            position: relative;
+        }
+        .highlight-color {
+            background-color: #ffcc00;
+            color: #000000;
+        }
+        .highlight-color-alt {
+            background-color: #cc00ff;
+        }
+        .popup {
+            display: none;
+            position: absolute;
+            background-color: #444;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        .output-box {
+            float: left;
+            margin-right: 10px;
+            width: 50%;
+            background-color: #2a2a2a;
+            height: 300px;
+        }
+        #captures {
+            display: table;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="area">
+        <div class="header">
+            <div style="font-size: 24px; margin-right: 10px;">EZR</div>
+            <h1>EZRegex</h1>
+        </div>
+
+
+        <textarea id="regexInput" oninput="onInputChange()" placeholder="Enter your regex here..."></textarea>
+
+
+        <div class="side-by-side">
+            <textarea class="output-box" id="textInput" oninput="onInputChange()" placeholder="Enter text to search..."></textarea>
+            <div id="output" class="output-box">
+            </div>
+        </div>
+    </div>
+
+
+    <div class="popup" id="popup">
+        <h4 id="popup_title"></h4>
+        <h2 id="match"></h2>
+        <div id="captures"></div>
+    </div>
+
+    <script>
+        const regexInput = document.getElementById('regexInput');
+        const textInput = document.getElementById('textInput');
+        const output = document.getElementById('output');
+        const popup = document.getElementById('popup');
+
+        function onInputChange() {
+            const regex = new RegExp(regexInput.value, 'g');
+            console.log(regex)
+            const text = textInput.value;
+            const matches = text.match(regex);
+            var index = 0;
+            output.innerHTML = text.replace(regex, (match, offset) => {
+                index += 1;
+                return `<span class="highlight-all ${index % 2 === 0 ? 'highlight-color' : 'highlight-color-alt'}">${match}</span>`;
+            });
+            output.innerHTML = output.innerHTML.replace(/(\n\r?)|(\r\n)/g, "<br>")
+
+            highlightMatches(regexInput.value);
+        }
+
+        function highlightMatches(regex_string) {
+
+
+            const regex = new RegExp(regex_string);
+
+            const highlights = document.querySelectorAll('.highlight-all');
+
+            highlights.forEach((highlight, index) => {
+
+                highlight.addEventListener('mouseover', () => {
+
+                    popup.querySelector("#popup_title").innerText = `Match ${index+1}`;
+                    popup.querySelector("#match").innerText = highlight.innerText;
+
+                    const captures = document.querySelector('#captures')
+
+                    table = "<table><tr><th>Name</th><th>Capture</th></tr>"
+
+                    const groups = highlight.innerText.match(regex)['groups']
+
+                    for (name in groups) {
+                        table = table + getCaptures(name, groups[name])
+                    }
+
+                    table += "</table>"
+
+                    captures.innerHTML = table
+
+                    popup.style.display = 'block';
+                    popup.style.left = `${event.pageX}px`;
+                    popup.style.top = `${event.pageY}px`;
+
+
+                });
+
+                highlight.addEventListener('mouseout', () => {
+                    popup.style.display = 'none';
+                });
+            });
+        }
+
+
+        function getCaptures(name, capture) {
+            return `<tr><td>${name}</td><td>${capture}</td></tr>`
+        }
+
+    </script>
+</body>
+</html>

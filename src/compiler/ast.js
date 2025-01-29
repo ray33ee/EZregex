@@ -1,9 +1,12 @@
 
 //AST nodes:
 //----------------------------------------------------------------------------------------
-//Source := 			List[Statement]
+//Source := 	       	List[Statement]
 //----------------------------------------------------------------------------------------
-//Statement := 			Assignment(id: identifier, expr: Expr)
+//Statement := 			Assignment(id: identifier, expr: Expr) |
+//                      Section(heading: Heading)
+//----------------------------------------------------------------------------------------
+//Heading :=            'code' | 'tests' | 'scratch'
 //----------------------------------------------------------------------------------------
 //Expr :=   	        Name(id: identifier) |
 //						Concatenate(left: Expr, right: Expr) |
@@ -32,12 +35,14 @@ class ASTNode {
 				var s;
 
 				if (typeof this[key] === 'string') {
-					s = this[key]
+					s = "'" + this[key] + "'"
 				} else if (this[key] instanceof Number) {
 					s = this[key] + ""
-				} else {
+				} else if (this[key] instanceof ASTNode) {
 					s = this[key].display()
-				}
+				} else {
+                    //Error, unrecognised node
+                }
 
 				pairs += key + ": " + s + ", ";
 			}
@@ -128,10 +133,58 @@ class Intersection extends Expr {
     }
 }
 
+function parse_expr(tokens) {
+    return new Expr()
+}
+
 function parse(tokens) {
-	const n = new Name("things");
-	const assign = new Statement("thingy", n)
-	const source = new Source([assign]);
-	console.log(source.display());
+
+    statements = []
+
+    for (line of tokens) {
+
+
+
+        if (line.length == 0) {
+            //Empty line, skip
+            continue;
+        }
+
+        if (line[0][0] != IDENTIFIER && line[0][0] != SECTION) {
+            //If the first token in each line isn't an identifier or a section heading, error
+        }
+
+        if (line[0][0] != SECTION && line.length == 1) {
+            //If there is only one token and its not a section heading, error
+        }
+
+        if (line[0][0] == IDENTIFIER) {
+
+            if (line[1][0] != ASSIGNMENT) {
+                //If the second token after an identifier is anything but an assignment, error
+            }
+
+            const e = parse_expr(tokens.slice(2));
+
+            statement = new Statement(line[0][1], e);
+
+            statements.push(statement)
+
+
+        } else {
+            //Section heading
+        }
+
+        consoleWrite("NEWLINE")
+        for (pair of line) {
+            consoleWrite(pair[0] + ": " + pair[1])
+        }
+    }
+
+	const s = new Source(statements);
+
+    consoleWrite(s.display())
+
+    return new Source(statements)
     
 }

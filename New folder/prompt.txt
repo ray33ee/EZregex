@@ -1,0 +1,3 @@
+Generated from 'https://zzzcode.ai/html/code-generator?id=03c737cc-8e0f-4703-8b10-aea2be47c53d' with the following prompt:
+
+'Create an iinput box 10 rows in height. create an output box 3 rows in height. create an input box 4 rows in height. All boxes must be centered in the page. All boxes must scale their width with the window width. text boxes should be contained within their own individual box (a containing box) for looks. The entire page should have a dark, sleek and minimal theme. Each text box must fit perfectly within its containing box.'
