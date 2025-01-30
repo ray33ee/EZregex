@@ -14,7 +14,11 @@ function build() {
 
 	tokens = tokenise(code)
 
+	display_tokens(tokens)
+
 	ast = parse(tokens)
+
+    consoleWrite(ast.display())
 
 	symbols = symbol_table(ast)
 

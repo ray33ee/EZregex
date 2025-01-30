@@ -1,4 +1,4 @@
 
 function optimise(ir) {
-	return null
+	return ir
 }

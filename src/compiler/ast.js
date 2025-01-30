@@ -3,10 +3,7 @@
 //----------------------------------------------------------------------------------------
 //Source := 	       	List[Statement]
 //----------------------------------------------------------------------------------------
-//Statement := 			Assignment(id: identifier, expr: Expr) |
-//                      Section(heading: Heading)
-//----------------------------------------------------------------------------------------
-//Heading :=            'code' | 'tests' | 'scratch'
+//Statement := 			Assignment(id: identifier, expr: Expr)
 //----------------------------------------------------------------------------------------
 //Expr :=   	        Name(id: identifier) |
 //						Concatenate(left: Expr, right: Expr) |
@@ -87,7 +84,7 @@ class Concatenate extends Expr {
     }
 }
 
-class Alternate extends Expr {
+class Alternation extends Expr {
     constructor(left, right) {
         super();
         this.left = left;
@@ -118,7 +115,7 @@ class CharacterClass extends Expr {
     }
 }
 
-class Not extends Expr {
+class Complement extends Expr {
     constructor(set) {
         super();
         this.set = set;
@@ -133,8 +130,145 @@ class Intersection extends Expr {
     }
 }
 
-function parse_expr(tokens) {
-    return new Expr()
+function parseRepetition(tokens) {
+    //Repetition: [NUMBER]?[RANGE][NUMBER]?
+
+    if (tokens.length == 1) {
+        //Single token, must be a range or a number
+        if (tokens[0].type == RANGE) {
+            return new Repetition()
+        } else if (tokens[0].type == INTEGER) {
+
+        } else {
+            //error
+        }
+
+
+    } else if (tokens.length == 2) {
+        //Two tokens, either a Number followed by a range, or a range followed by a number
+    } else if (tokens.length == 3) {
+        //Three tokens, a number a range then a number
+    }
+
+    //Either tokens is empty or contains more than 3 tokens. Either way this is invalid syntax
+}
+
+function parseExpr(tokens) {
+
+    //Identifier, +, |, Characterset, Range, not, or, (, ), Quote
+
+    //Binary operators: +, |, or
+    //Unary operators: not, Range
+    //Literals: Identifier, Characterset, Quote
+
+    operator_stack = [] //array of tokens
+
+    queue = [] //array of ast nodes
+
+    //TODO: Think about these numbers:
+    precedence = {
+        CONCATENATION: 0,
+        ALTERNATION: 0,
+        OR_KEYWORD: 0,
+        NOT_KEYWORD: 0,
+        REPETITION: 0,
+    }
+
+    function pop_operator() {
+        popped = operator_stack.pop();
+
+        if (popped.type == CONCATENATION) {
+            right = queue.pop();
+            left = queue.pop();
+            queue.push(new Concatenate(left, right));
+        } else if (popped.type == ALTERNATION) {
+            right = queue.pop();
+            left = queue.pop();
+            queue.push(new Alternation(left, right));
+        } else if (popped.type == OR_KEYWORD) {
+            setb = queue.pop();
+            seta = queue.pop();
+            queue.push(new Intersection(seta, setb));
+        } else if (popped.type == NOT_KEYWORD) {
+            queue.push(new Complement(queue.pop()))
+        } else if (popped.type == REPETITION) {
+
+            queue.push(new Repetition(queue.pop(), "not implemented", "Also not implemented"))
+
+        }
+    }
+
+    for (token of tokens) {
+
+        if (token.type == IDENTIFIER) {
+            queue.push(new Name(token.data));
+        } else if (token.type == CHARACTER_SET) {
+            queue.push(new CharacterClass(token.data));
+        } else if (token.type == STRING_QUOTE) {
+            queue.push(new Literal(token.data))
+        } else if (token.type == CONCATENATION || token.type == ALTERNATION || token.type == OR_KEYWORD || token.type == NOT_KEYWORD || token.type == REPETITION) {
+            while (true) {
+
+                if (operator_stack.length == 0) {
+                    break;
+                }
+
+                if (operator_stack[operator_stack.length-1].type === LEFT_PARENTHESIS) {
+                    break;
+                }
+
+                if (precedence[operator_stack[operator_stack.length-1].type] < precedence[token.type]) {
+                    break;
+                }
+
+                pop_operator();
+
+            }
+
+            operator_stack.push(token);
+
+
+        } else if (token.type == LEFT_PARENTHESIS) {
+            operator_stack.push(token);
+        } else if (token.type == RIGHT_PARENTHESIS) {
+
+            while (true) {
+
+                if (operator_stack.length == 0) {
+                    console.log("Error, mismatched parenthesis a");
+                    return null;
+                }
+
+                if (operator_stack[operator_stack.length - 1].type == LEFT_PARENTHESIS) {
+                    break;
+                }
+
+                pop_operator();
+
+            }
+
+            operator_stack.pop();
+        }
+    }
+
+    for (let i = 0; i < operator_stack.length; i++) {
+        if (operator_stack[operator_stack.length-1].type == LEFT_PARENTHESIS) {
+            console.log("Error, mismatched parenthesis b");
+            return null;    
+        }
+
+        pop_operator();
+    }
+
+    if (queue.length != 1) {
+        //error
+        console.log("Queue length is not one")
+        console.log(queue.length)
+    }
+
+    node = queue[0];
+
+    return node;
 }
 
 function parse(tokens) {
@@ -150,23 +284,26 @@ function parse(tokens) {
             continue;
         }
 
-        if (line[0][0] != IDENTIFIER && line[0][0] != SECTION) {
-            //If the first token in each line isn't an identifier or a section heading, error
+        if (line[0].type != IDENTIFIER) {
+            //If the first token in each line isn't an identifier, error
+            console.log("the first token in each line isn't an identifier, error")
         }
 
-        if (line[0][0] != SECTION && line.length == 1) {
-            //If there is only one token and its not a section heading, error
+        if (line.length == 1) {
+            //If there is only one token, errorv
+            console.log(" there is only one token, errorv")
         }
 
-        if (line[0][0] == IDENTIFIER) {
+        if (line[0].type == IDENTIFIER) {
 
-            if (line[1][0] != ASSIGNMENT) {
+            if (line[1].type != ASSIGNMENT) {
                 //If the second token after an identifier is anything but an assignment, error
+                console.log("the second token after an identifier is anything but an assignment, error")
             }
 
-            const e = parse_expr(tokens.slice(2));
+            const e = parseExpr(line.slice(2));
 
-            statement = new Statement(line[0][1], e);
+            statement = new Statement(line[0].data, e);
 
             statements.push(statement)
 
@@ -174,17 +311,10 @@ function parse(tokens) {
         } else {
             //Section heading
         }
-
-        consoleWrite("NEWLINE")
-        for (pair of line) {
-            consoleWrite(pair[0] + ": " + pair[1])
-        }
     }
 
 	const s = new Source(statements);
 
-    consoleWrite(s.display())
-
-    return new Source(statements)
+    return s
     
 }
