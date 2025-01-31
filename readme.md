@@ -124,7 +124,6 @@ Source code is split into the following sections:
 
 - Code: This section contains the script that will be converted into a regex
 - Tests: This (optional) section contains a set of tests which are performed on the regex. If any tests fail the user will be notified
-- Scratch: This (optional) section contains text which the regex is used on. This can be used to experiment, test and verify on the fly before creating formal tests
 
 ## Compiler
 
@@ -146,7 +145,7 @@ EXRegex will have an online IDE structured as follows:
 - Then, to the right of this (side by side) we have the output window which contains two tabs:
 	- THe output of the console (any errors, warnings from the compiler plus the results of any tests)
 		- The Console output should have a button to clear output
-	- The output of the regex when applied to the scratch portion of the source code
+	- A scratch pad that can be used to test which sequences the regex will and wont match, and any named captures
 	- The regex itself, with the option to choose the flavor
 - On the top of the page we have the tool bar, which contains the run, build, test and scratch buttons as well as buttons for saving/loading to disk and copying URL.
 	- Build: Converts code into a regex and displays output to console
@@ -154,7 +153,8 @@ EXRegex will have an online IDE structured as follows:
 	- Scratch: Builds + applies the regex to the scratch portion, highlighting any matches and displaying any capture groups in a popup window when the user mouses over highlights
 	- Run: Build + Test + Scratch
 - A popup message (in the bottom right) should appear informing the user of succcess/fail from the compiler and pass/fail from the tests
-- There also needs to be a way to choose the flavor of the final output regex
+
+Note: See [This](https://codersblock.com/blog/highlight-text-inside-a-textarea/) for details on how to highlight the matches in the scratch space
 
 ## Technical breakdown
 

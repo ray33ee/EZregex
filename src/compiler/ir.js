@@ -2,6 +2,8 @@
 
 //RegexIR := 			List[Item]
 //Item := 				EscapedString(str: string) |
+//						LeftSet |
+//						RightSet |
 //						CharacterSet(set: string) |
 //						Anchor(type: AnchorType) |
 //						WordBoundary |
@@ -43,7 +45,6 @@ class IrNode {
 				if (typeof this[key] === 'string') {
 					s = "'" + this[key] + "'"
 				} else if (typeof this[key] === 'number') {
-					console.log("NUMBER")
 					s = this[key] + ""
 				} else if (this[key] instanceof IrNode) {
 					s = this[key].display()
@@ -70,6 +71,18 @@ class CharacterSet extends IrNode {
 	constructor(set) {
 		super();
 		this.set = set
+	}
+}
+
+class LeftSet extends IrNode {
+	constructor() {
+		super();
+	}
+}
+
+class RightSet extends IrNode {
+	constructor() {
+		super();
 	}
 }
 
@@ -158,6 +171,13 @@ class IrCreator extends NodeVisitor {
 		this.ir = []
 	}
 
+	wrap_set(inner) {
+		var l = inner;
+		l.unshift(new LeftSet())
+		l.push(new RightSet())	
+		return l
+	}
+
 	wrap_named(name, inner) {
 		var l = inner;
 		l.unshift(new NamedCaptureLeft(name))
@@ -222,7 +242,7 @@ class IrCreator extends NodeVisitor {
 		} else if (node.start == 0 && node.end == 1) {
 			//optional
 			rep = new Optional();
-		} else if (node.start == node.end) {
+		} else if (node.start === node.end) {
 			//Exact
 			rep = new Exact(node.start);
 		} else {
@@ -231,6 +251,18 @@ class IrCreator extends NodeVisitor {
 		}
 
 		return t.wrap_unnamed(t.visit(t, node.expr)).concat(rep)
+	}
+
+	visit_CharacterClass(t, node) {
+		return t.wrap_set([new CharacterSet(node.set)])
+	}
+
+	visit_Complement(t, node) {
+		console.lop("Character set complement not implemented yet")
+	}
+
+	visit_Intersection(t, node) {
+		console.lop("Character set intersection not implemented yet")
 	}
 
 
@@ -242,8 +274,6 @@ function ir_generate(ast, symbols) {
 	creator = new IrCreator();
 
 	creator.visit(creator, ast)
-
-	console.log(creator.symbol_map)
 
 	return creator.ir
 }

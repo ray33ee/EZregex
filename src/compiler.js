@@ -21,8 +21,7 @@ function build() {
 
 	console.log("Compiler.js - ast: " + ast.display())
 
-	//symbols = symbol_tree(ast)
-	symbols = null;
+	symbols = symbol_tree(ast)
 
 	//console.log("Compiler.js - symbols:")
 	//console.log(symbols)
@@ -38,5 +37,7 @@ function build() {
 
 	optimised_ir = optimise(ir)
 
-	regex = generate_regex(ir, flavor)
+	regex = translate(ir, new IRTranslator())
+
+	console.log(regex)
 }

@@ -32,6 +32,8 @@ class SymbolVisitor extends NodeVisitor {
 }
 
 function symbol_tree(ast) {
+	console.log("Warning: We don't make a symbol tree just yet so the next line of code skips this step and returns null")
+	return null
 
 	tv = new SymbolVisitor();
 

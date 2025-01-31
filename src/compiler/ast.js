@@ -206,8 +206,25 @@ function parseExpr(tokens) {
         } else if (popped.type == NOT_KEYWORD) {
             queue.push(new Complement(queue.pop()))
         } else if (popped.type == REPETITION) {
-            console.log("ERROR: Repetition parsing not quite finished yet")
-            queue.push(new Repetition(queue.pop(), 1, 1))
+
+            const r = new RegExp(/(?<min>[0-9]*)(?<range>(..)?)(?<max>[0-9]*)/);
+
+            const m = r.exec(popped.data)
+
+            if (m == null) {
+                //Invalid repetition format, error
+                console.log("Error: Invalid repetition: '{" + popped.data + "}'")
+            }
+
+            min = m["groups"]["min"] == "" ? "" : Number(m["groups"]["min"])
+            max = m["groups"]["max"] == "" ? "" : Number(m["groups"]["max"])
+
+            //If the user omits the '..' then the repetition must be treated as an 'Exact', so we set max and min as the same
+            if (m["groups"]["range"] == "") {
+                max = min;
+            }
+
+            queue.push(new Repetition(queue.pop(), min, max))
 
         }
     }
