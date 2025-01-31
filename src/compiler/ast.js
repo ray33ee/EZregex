@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------------
 //Source := 	       	List[Statement]
 //----------------------------------------------------------------------------------------
-//Statement := 			Assignment(id: identifier, expr: Expr)
+//Statement := 			Assignment(id: identifier, expr: Expr) | Return(expr: Expr)
 //----------------------------------------------------------------------------------------
 //Expr :=   	        Name(id: identifier) |
 //						Concatenate(left: Expr, right: Expr) |
@@ -11,7 +11,7 @@
 //						Literal(value: String)	|
 //						Repetition(expr: Expr, start: Integer, end: Integer) |
 //						CharacterClass(set: String) | 
-//						Not(set: Expr) |
+//						Complement(set: Expr) |
 //						Intersection(seta: Expr, setb: Expr) |
 //----------------------------------------------------------------------------------------
 
@@ -33,12 +33,13 @@ class ASTNode {
 
 				if (typeof this[key] === 'string') {
 					s = "'" + this[key] + "'"
-				} else if (this[key] instanceof Number) {
+                } else if (typeof this[key] === 'number') {
 					s = this[key] + ""
 				} else if (this[key] instanceof ASTNode) {
 					s = this[key].display()
 				} else {
                     //Error, unrecognised node
+                    console.log("Unknown token in ASTNode '" + this[key] + "' - " + typeof(this[key]))
                 }
 
 				pairs += key + ": " + s + ", ";
@@ -56,10 +57,23 @@ class Source extends ASTNode {
 }
 
 class Statement extends ASTNode {
+    constructor() {
+        super();
+    }
+}
+
+class Assignment extends Statement {
     constructor(id, expr) {
     	super();
         this.id = id;
         this.expr = expr;
+    }
+}
+
+class Return extends Statement {
+    constructor(expr) {
+        super();
+        this.expr = expr
     }
 }
 
@@ -192,8 +206,8 @@ function parseExpr(tokens) {
         } else if (popped.type == NOT_KEYWORD) {
             queue.push(new Complement(queue.pop()))
         } else if (popped.type == REPETITION) {
-
-            queue.push(new Repetition(queue.pop(), "not implemented", "Also not implemented"))
+            console.log("ERROR: Repetition parsing not quite finished yet")
+            queue.push(new Repetition(queue.pop(), 1, 1))
 
         }
     }
@@ -284,8 +298,10 @@ function parse(tokens) {
             continue;
         }
 
-        if (line[0].type != IDENTIFIER) {
-            //If the first token in each line isn't an identifier, error
+
+
+        if (line[0].type != IDENTIFIER && line[0].type != RETURN) {
+            //If the first token in each line isn't an identifier or return, error
             console.log("the first token in each line isn't an identifier, error")
         }
 
@@ -303,13 +319,21 @@ function parse(tokens) {
 
             const e = parseExpr(line.slice(2));
 
-            statement = new Statement(line[0].data, e);
+            statement = new Assignment(line[0].data, e);
 
             statements.push(statement)
 
 
+        } else if (line[0].type == RETURN) {
+            //Return
+
+            const e = parseExpr(line.slice(1));
+
+            ret = new Return(e);
+
+            statements.push(ret)
         } else {
-            //Section heading
+            //error
         }
     }
 

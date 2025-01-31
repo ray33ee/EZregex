@@ -1,5 +1,6 @@
 
 
+
 function build() {
 
 	// Get code
@@ -18,13 +19,22 @@ function build() {
 
 	ast = parse(tokens)
 
-    consoleWrite(ast.display())
+	console.log("Compiler.js - ast: " + ast.display())
 
-	symbols = symbol_table(ast)
+	//symbols = symbol_tree(ast)
+	symbols = null;
 
-	semantics_checker(ast, symbols)
+	//console.log("Compiler.js - symbols:")
+	//console.log(symbols)
+
+	if (!semantics_checker(ast, symbols)) {
+		//Semantics checker failed, error
+		console.log("semantics_checker failed, err.r");
+	}
 
 	ir = ir_generate(ast, symbols)
+
+	console.log(ir_display(ir))
 
 	optimised_ir = optimise(ir)
 

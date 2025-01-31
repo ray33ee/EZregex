@@ -10,6 +10,10 @@ const OR_KEYWORD = 10;
 const LEFT_PARENTHESIS = 11;
 const RIGHT_PARENTHESIS = 12;
 const STRING_QUOTE = 13;
+const RETURN = 14;
+
+
+
 
 class Token {
 	constructor() {
@@ -48,8 +52,11 @@ class Token {
 			return "RightParenthesis"
 		} else if (this.type == STRING_QUOTE) {
 			return "String"
+		} else if (this.type == RETURN) {
+			return "Return"
 		} else {
 			//Unrecognised type, error
+			console.log("ERROR: Unrecognised token type '" + this.type + "'")
 		}
 	}
 }
@@ -78,6 +85,10 @@ function tokenise(source) {
 			} else if (current_token.data == "or") {
 				//current_token = new Token(OR_KEYWORD, "")
 				current_token.type = NOT_KEYWORD
+				current_token.data = ""
+			} else if (current_token.data == "return") {
+				//current_token = new Token(RETURN, "")
+				current_token.type = RETURN
 				current_token.data = ""
 			}
 		}
