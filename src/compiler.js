@@ -37,6 +37,8 @@ function build() {
 
 	optimised_ir = optimise(ir)
 
+	console.log(ir_display(optimised_ir))
+
 	regex = translate(ir, new IRTranslator())
 
 	console.log(regex)

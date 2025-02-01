@@ -88,6 +88,10 @@ class IRTranslator {
 	translate_Star(t, node) {
 		t.append("*")
 	}
+
+	translate_Empty(t, node) {
+		
+	}
 	
 }
 

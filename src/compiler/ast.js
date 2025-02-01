@@ -207,6 +207,8 @@ function parseExpr(tokens) {
             queue.push(new Complement(queue.pop()))
         } else if (popped.type == REPETITION) {
 
+            console.log(popped.data)
+
             const r = new RegExp(/(?<min>[0-9]*)(?<range>(..)?)(?<max>[0-9]*)/);
 
             const m = r.exec(popped.data)
@@ -223,6 +225,9 @@ function parseExpr(tokens) {
             if (m["groups"]["range"] == "") {
                 max = min;
             }
+
+            console.log(min)
+            console.log(max)
 
             queue.push(new Repetition(queue.pop(), min, max))
 

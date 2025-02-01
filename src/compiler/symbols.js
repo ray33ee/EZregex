@@ -1,9 +1,8 @@
 
 
 class Symbol {
-	constructor(map, expr) {
-		this.map = map;
-		this.expr = expr;
+	constructor(refs) {
+		this.refs = refs //Count the number of times the symbol is referenced
 	}
 }
 
@@ -14,32 +13,31 @@ class SymbolTable {
 class SymbolVisitor extends NodeVisitor {
 	constructor() {
 		super();
-		this.map = {}
-		this.working_id = ""
+		this.symbol_map = {} //Map symbol names to Symbol class
 	}
 
 	visit_Assignment(t, node) {
-		t.map[node.id] = new Symbol({}, node.expr)
-		t.working_id = node.id
+		t.symbol_map[node.id] = new Symbol(0)
 		t.visit(t, node.expr)
 	}
 
 	visit_Name(t, node) {
-		t.map[t.working_id].map[node.id] = t.map[node.id]
+		if (t.symbol_map[node.id] == undefined) {
+			console.log("Variable '" + node.id + "' is used before it is declared")
+		}
+		t.symbol_map[node.id].refs += 1
 	}
 
 
 }
 
 function symbol_tree(ast) {
-	console.log("Warning: We don't make a symbol tree just yet so the next line of code skips this step and returns null")
-	return null
 
 	tv = new SymbolVisitor();
 
 	tv.visit(tv, ast)
 
-	console.log(tv.map[tv.working_id])
+	console.log(tv.symbol_map)
 
-	return tv.map[tv.working_id]
+	return tv.symbol_map
 }

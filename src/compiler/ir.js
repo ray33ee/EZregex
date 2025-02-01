@@ -9,9 +9,9 @@
 //						WordBoundary |
 //						Alternate |
 //						# Groups
-//						NonCaptureLeft |
+//						NonCaptureLeft(close: NonCaptureRight) |
 //						NonCaptureRight |
-//						NamedCaptureLeft(name: string) |
+//						NamedCaptureLeft(name: string, close: NamedCaptureRight) |
 //						NamedCaptureRight |
 //						# Repeating
 //						Limiting(min: number, max: number) |
@@ -106,8 +106,9 @@ class Alternate extends IrNode {
 }
 
 class NonCaptureLeft extends IrNode {
-	constructor() {
+	constructor(close) {
 		super();
+		this.close = close
 	}
 }
 
@@ -118,9 +119,10 @@ class NonCaptureRight extends IrNode {
 }
 
 class NamedCaptureLeft extends IrNode {
-	constructor(name) {
+	constructor(name, close) {
 		super();
 		this.name = name
+		this.close = close
 	}
 }
 
@@ -130,7 +132,13 @@ class NamedCaptureRight extends IrNode {
 	}
 }
 
-class Limiting extends IrNode {
+class Repeating extends IrNode {
+	constructor() {
+		super();
+	}
+}
+
+class Limiting extends Repeating {
 	constructor(min, max) {
 		super();
 		this.min = min
@@ -138,26 +146,32 @@ class Limiting extends IrNode {
 	}
 }
 
-class Exact extends IrNode {
+class Exact extends Repeating {
 	constructor(n) {
 		super();
 		this.n = n
 	}
 }
 
-class Optional extends IrNode {
+class Optional extends Repeating {
 	constructor() {
 		super();
 	}
 }
 
-class Plus extends IrNode {
+class Plus extends Repeating {
 	constructor() {
 		super();
 	}
 }
 
-class Star extends IrNode {
+class Star extends Repeating {
+	constructor() {
+		super();
+	}
+}
+
+class Empty extends IrNode {
 	constructor() {
 		super();
 	}
@@ -165,30 +179,36 @@ class Star extends IrNode {
 
 class IrCreator extends NodeVisitor {
 
-	constructor() {
+	constructor(symbols) {
 		super();
 		this.symbol_map = new Map();
 		this.ir = []
+		this.name_set = new Set();
 	}
 
 	wrap_set(inner) {
-		var l = inner;
+		var l = []
+		l = l.concat(inner);
 		l.unshift(new LeftSet())
 		l.push(new RightSet())	
 		return l
 	}
 
 	wrap_named(name, inner) {
-		var l = inner;
-		l.unshift(new NamedCaptureLeft(name))
-		l.push(new NamedCaptureRight())	
+		var l = []
+		l = l.concat(inner);
+		var right = new NamedCaptureRight()
+		l.unshift(new NamedCaptureLeft(name, right))
+		l.push(right)	
 		return l
 	}
 
 	wrap_unnamed(inner) {
-		var l = inner;
-		l.unshift(new NonCaptureLeft())
-		l.push(new NonCaptureRight())	
+		var l = []
+		l = l.concat(inner);
+		var right = new NonCaptureRight()
+		l.unshift(new NonCaptureLeft(right))
+		l.push(right)	
 		return l
 	}
 
@@ -204,6 +224,7 @@ class IrCreator extends NodeVisitor {
 		if (t.symbol_map.has(node.id)) {
 
 			return t.wrap_named(node.id, t.symbol_map.get(node.id));
+			
 		} else {
 			//If control flow reaches here, a variable is used before it is defined, error
 			console.log("Variable '" + node.id + "' is used before it is declared")
@@ -265,13 +286,11 @@ class IrCreator extends NodeVisitor {
 		console.lop("Character set intersection not implemented yet")
 	}
 
-
-
 }
 
 function ir_generate(ast, symbols) {
 
-	creator = new IrCreator();
+	creator = new IrCreator(symbols);
 
 	creator.visit(creator, ast)
 
