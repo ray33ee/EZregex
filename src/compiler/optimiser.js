@@ -1,4 +1,5 @@
 
+//Fiven the IR and the index of the open bracket, return the index of the corresponding closing bracket for non capturing and named groups
 function find_close(ir, index) {
 	//Get the node
 	var node = ir[index]
@@ -14,6 +15,7 @@ function find_close(ir, index) {
 		open_bracket_type = NonCaptureLeft;
 		closing_bracket_type = NonCaptureRight;
 	} else {
+		console.log(node.constructor.name)
 		console.log("Error: Invalid node")
 	}
 
@@ -56,15 +58,11 @@ function optimise_names(ir) {
 	for (node of ir) {
 		if (node instanceof NamedCaptureLeft) {
 			if (names.get(node.name) > 1) {
-				console.log("Found item " + node.name)
-				console.log([count, find_close(ir, count)])
 				change_list.push([count, find_close(ir, count)])
 			}
 		}
 		count++
 	}
-
-	console.log(names)
 
 	//Iterate over the change list and replace all the named captures with unnamed
 	for (pair of change_list) {
@@ -86,6 +84,28 @@ function optimise_names(ir) {
 //		- contain only 'CharacterSet', 'EscapedString' and 'Repeating' and do NOT have a repeating after
 //		- Contains a single element
 function optimise_units(ir) {
+
+	indices_to_remove = []
+	count = 0
+
+	for (node of ir) {
+		if (node instanceof NonCaptureLeft) {
+			closing = find_close(ir, count)
+			if (closing == count + 2) {
+				//If there's only one item in the non capturing group, remove the group
+				indices_to_remove.push(count)
+				indices_to_remove.push(closing)	
+			}
+		}
+		count++;
+	}
+
+	for (index of indices_to_remove.sort(function(a, b){return a-b}).reverse()) {
+		ir.splice(index, 1)
+	}
+
+	console.log(translate(ir, new IRTranslator()))
+
 	return ir
 }
 
@@ -111,8 +131,8 @@ function optimise_overlaps(ir) {
 		count++;
 	}
 
-	for (index of indices_to_remove) {
-		ir.splice(index, 1, new Empty())
+	for (index of indices_to_remove.sort(function(a, b){return a-b}).reverse()) {
+		ir.splice(index, 1)
 	}
 
 	return ir
@@ -120,11 +140,18 @@ function optimise_overlaps(ir) {
 
 function optimise(ir) {
 
-	ir = optimise_names(ir)
+	old_ir = optimise_names(ir)
 
-	ir = optimise_units(ir)
+	//Keep iterating over the optimisation passes until no more changes are made
+	while (old_ir !== translate(ir, new IRTranslator())) {
 
-	ir = optimise_overlaps(ir)
+		old_ir = translate(ir, new IRTranslator())
+
+		ir = optimise_units(ir)
+
+		ir = optimise_overlaps(ir)
+
+	}
 
 	return ir
 }

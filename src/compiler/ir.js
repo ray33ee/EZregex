@@ -2,8 +2,6 @@
 
 //RegexIR := 			List[Item]
 //Item := 				EscapedString(str: string) |
-//						LeftSet |
-//						RightSet |
 //						CharacterSet(set: string) |
 //						Anchor(type: AnchorType) |
 //						WordBoundary |
@@ -171,12 +169,6 @@ class Star extends Repeating {
 	}
 }
 
-class Empty extends IrNode {
-	constructor() {
-		super();
-	}
-}
-
 class IrCreator extends NodeVisitor {
 
 	constructor(symbols) {
@@ -184,14 +176,6 @@ class IrCreator extends NodeVisitor {
 		this.symbol_map = new Map();
 		this.ir = []
 		this.name_set = new Set();
-	}
-
-	wrap_set(inner) {
-		var l = []
-		l = l.concat(inner);
-		l.unshift(new LeftSet())
-		l.push(new RightSet())	
-		return l
 	}
 
 	wrap_named(name, inner) {
@@ -275,7 +259,7 @@ class IrCreator extends NodeVisitor {
 	}
 
 	visit_CharacterClass(t, node) {
-		return t.wrap_set([new CharacterSet(node.set)])
+		return [new CharacterSet(node.set)]
 	}
 
 	visit_Complement(t, node) {

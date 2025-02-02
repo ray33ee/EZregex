@@ -33,11 +33,7 @@ function build() {
 
 	ir = ir_generate(ast, symbols)
 
-	console.log(ir_display(ir))
-
 	optimised_ir = optimise(ir)
-
-	console.log(ir_display(optimised_ir))
 
 	regex = translate(ir, new IRTranslator())
 

@@ -29,16 +29,10 @@ class IRTranslator {
 		t.append(node.str);
 	}
 
-	translate_LeftSet(t, node) {
-		t.append("["); 
-	}
-
-	translate_RightSet(t, node) {
-		t.append("]"); 
-	}
-
 	translate_CharacterSet(t, node) {
+		t.append("[")
 		t.append(node.set)
+		t.append("]")
 	}
 
 	translate_Anchor(t, node) {
