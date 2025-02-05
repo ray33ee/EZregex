@@ -1,0 +1,86 @@
+# Editable Code Window with Line Numbers using highlight.js
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <style>
+        body{ margin:0; font:14px/1 sans-serif; }
+
+        /*scrollbar*/
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #0bf; border-radius: 1rem; }
+
+        .highLite{
+          border: 1px solid #888;
+          position: relative;
+          overflow: auto; 
+          height: 9rem; /* set as desired */
+        }
+
+        .highLite_colors,
+        .highLite_editable {
+          padding: 1rem;
+          min-height: calc(100% - 2rem);
+        }
+
+        /* THE UNDERLAYING ONE WITH COLORS */
+        .highLite_colors {
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; 
+          user-select: none;
+        }
+
+        /* THE OVERLAYING CONTENTEDITABLE WITH TRANSPARENT TEXT */
+        .highLite_editable {
+          position: relative;
+          color: transparent; /* Make text invisible */
+          caret-color: black; /* But keep caret visible */
+        }
+        .highLite_editable:focus {
+          outline: none;
+        }
+
+        .hl_operator{ color: turquoise; }
+        .hl_string{ color: fuchsia; }
+        .hl_characters{ color: seagreen; }
+    </style>
+</head>
+<body>
+
+<div class="highLite">
+  <div class="highLite_colors">Type &lt;here&gt; {something}</div>
+  <div class="highLite_editable" contenteditable>Type &lt;here&gt; {something}</div>
+</div>
+
+<script>
+
+    // https://stackoverflow.com/questions/41884969/highlight-syntax-in-contenteditable
+    function highLite(el) {
+
+      lines = tokenise(el.innerHTML)
+
+      console.log(lines)
+
+      el.previousElementSibling.innerHTML = el.innerHTML
+         .replace(/(=|\+|\||not|or)/g, "<span class='hl_operator'>$1</span>")
+         .replace(/(\"[^"]*\")/g, "<span class='hl_string'>$1</span>")
+         .replace(/(\[[^\]]*\])/g, "<span class='hl_characters'>$1</span>")
+         ;
+    };
+
+    document.querySelectorAll("[contenteditable]").forEach(el => {
+      el.addEventListener("input", () => highLite(el));
+      highLite(el);
+    });
+</script>
+
+</body>
+</html>

@@ -19,6 +19,8 @@ class Token {
 	constructor() {
 		this.type = -1;
 		this.data = "";
+		this.start = -1
+		this.end = -1
 	}
 
 	isempty() {
@@ -61,6 +63,32 @@ class Token {
 	}
 }
 
+function split_lines(source) {
+	r = []
+	
+	s = ""
+
+	index = 0
+
+	for (char of source) {
+		if (char == "\n" ) {
+			if (index != source.length - 1) {
+				r.push(s)
+				s = ""
+			}
+		} else {
+			s += char
+		}
+		index++;
+	}
+
+	r.push(s)
+
+    return r
+
+
+}
+
 function tokenise(source) {
 
 	tokens = []
@@ -99,13 +127,13 @@ function tokenise(source) {
 		current_token = new Token()
 	}
 
-	for (line of source.split('\n')) {
+	var index = 0;
 
-		if (line[0] == "@") {
-			current_token = new Token(SECTION, line.substring(1))
-			send_token()
-			continue;
-		}
+	console.log("split")
+	console.log("'" + source + "'")
+	console.log(split_lines(source))
+
+	for (line of split_lines(source)) {
 
 		for (char of line) {
 
@@ -113,7 +141,10 @@ function tokenise(source) {
 
 				if (char == "\"") {
 					if (back_slash_count % 2 == 0) {
+						current_token.end = current_token.data.length + current_token.start + 2
+						console.log(char)
 						send_token();
+						index++;
 						continue;
 					}
 
@@ -126,6 +157,7 @@ function tokenise(source) {
 				}
 
 				current_token.append_data(char)
+				index++;
 				continue;
 			}
 
@@ -133,7 +165,9 @@ function tokenise(source) {
 
 				if (char == "]") {
 					if (back_slash_count % 2 == 0) {
+						current_token.end = current_token.data.length + current_token.start + 2
 						send_token();
+						index++;
 						continue;
 					}
 
@@ -146,21 +180,26 @@ function tokenise(source) {
 				}
 
 				current_token.append_data(char)
+				index++;
 				continue;
 			}
 
 			if (current_token.type == REPETITION) {
 				if (char == "}") {
+					current_token.end = current_token.data.length + current_token.start + 2
 					send_token();
+					index++;
 					continue;
 				}
 
 				current_token.append_data(char);
+				index++;
 				continue;
 			}
 
 			if (char === "#") {
 				send_token();
+				index += line.length - index
 				break;
 			} else if (char == "\n" || char == "\r" || char == "\t" || char == " ") {
 				send_token();
@@ -172,14 +211,20 @@ function tokenise(source) {
 				current_token.append_data(char)
 			} else if (char == "=") {
 				send_token();
+				current_token.start = index
+				current_token.end = index+1
 				current_token.type = ASSIGNMENT;
 				send_token();
 			} else if (char == "+") {
 				send_token();
+				current_token.start = index
+				current_token.end = index+1
 				current_token.type = CONCATENATION;
 				send_token();
 			} else if (char == "|") {
 				send_token();
+				current_token.start = index
+				current_token.end = index+1
 				current_token.type = ALTERNATION;
 				send_token();
 			} else if (char == "(") {
@@ -192,26 +237,32 @@ function tokenise(source) {
 				send_token();
 			} else if (char == "{") {
 				send_token();
+				current_token.start = index
 				current_token.type = REPETITION;
 			} else if (char == '"') {
 				send_token()
+				current_token.start = index
 				current_token.type = STRING_QUOTE
 				current_token.data = ""
 			} else if (char == '[') {
 				send_token()
+				current_token.start = index
 				current_token.type = CHARACTER_SET
 				current_token.data = ""
 			}
 
-
+			index++;
 		}
 
 		send_token();
 
 		if (tokens.length != 0) {
 			rows.push(tokens);
-			tokens = []
+			tokens = [];
 		}
+
+		index ++;
+
 	}
 
 	return rows

@@ -4,7 +4,7 @@
 function build() {
 
 	// Get code
-	source = document.getElementById("source").value;
+	source = document.getElementById("source").innerText;
 
 	d = preprocessor(source)
 
@@ -28,7 +28,7 @@ function build() {
 
 	if (!semantics_checker(ast, symbols)) {
 		//Semantics checker failed, error
-		console.log("semantics_checker failed, err.r");
+		console.log("semantics_checker failed, error");
 	}
 
 	ir = ir_generate(ast, symbols)

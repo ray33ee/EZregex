@@ -142,6 +142,8 @@ The compiler can deduce the output regex by looking at the top-level fragment
 EXRegex will have an online IDE structured as follows:
 
 - Most of the screen will be comprised of the code window, on the LHS of the window
+	- Use syntax highlightingh
+	- include line numbers
 - Then, to the right of this (side by side) we have the output window which contains two tabs:
 	- THe output of the console (any errors, warnings from the compiler plus the results of any tests)
 		- The Console output should have a button to clear output
