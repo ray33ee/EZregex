@@ -103,6 +103,7 @@
           padding: 1rem;
           min-height: calc(100% - 2rem);
           font-family:  "Lucida Console", "Courier New", monospace;
+          white-space: pre;
         }
 
         /* THE UNDERLAYING ONE WITH COLORS */
@@ -179,6 +180,11 @@
     <script type="text/javascript" src="./src/compiler/preprocess.js"></script>
     <script type="text/javascript" src="./src/compiler/translate.js"></script>
     <script>
+
+        const el = document.getElementById("source")
+
+        el.addEventListener("paste", (event) => { custom_paste(event) })
+
         function switchTab(tab) {
             document.querySelectorAll('.output-area').forEach(div => {
                 div.classList.remove('active');
@@ -201,12 +207,50 @@
             
         }
 
+        function custom_paste(event) {
+            throw new NotImplemented("Pasting doesn't work as expected. Use with caution. (Pasting doesn't respect the same rules used when converting plaintext contenteditable into html)")
+            
+
+        }
+
         // https://stackoverflow.com/questions/41884969/highlight-syntax-in-contenteditable
-        function highLite(el) {
+        function highLite() {
+            console.log("Inner HTML")
+            console.log("'" + el.innerHTML + "'")
+            console.log("'" + el.constructor.name + "'")
+            console.log("done")
 
-            tokens = tokenise(el.innerText)
+            console.log(el.querySelectorAll("div"))
 
-            console.log(tokens)
+            source = ""
+
+            //So basically whatever demonic code creates HTML from contendeditable div plaintext doesnt work
+            //because when we undo this by calling innerText we get a different string. So we opt to create our own custom
+            //innerText function which gets the source code in the correct format
+
+            console.log(el.innerHTML)
+
+            div_count = el.querySelectorAll("div").length
+
+            if (div_count == 0) {
+                source = el.innerText
+            } else {
+                counter = 0
+                var last_div = null
+                for (div of el.querySelectorAll("div")) {
+                    source += div.innerText.replace(/[\n]/g, "") + (counter == div_count-1 ? "" : "\n")
+                    counter++;
+                    last_div = div
+                }
+                console.log(last_div.nextElementSibling)
+            }
+
+            console.log("Cleaned")
+            console.log("'" + source + "'")
+
+            tokens = tokenise(source)
+
+            console.log("'" + source + "'")
 
             index = 0;
 
@@ -219,26 +263,27 @@
             for (token of tokens) {
                 for (t of token) {
                     if (t.start != -1 && t.end != -1) {
-                        s = s + el.innerText.slice(prev_end, t.start)
-                        s = s + `<span class='sh_${t.type_str()}'>` + el.innerText.slice(t.start, t.end) + "</span>"
+                        s = s + source.slice(prev_end, t.start)
+                        s = s + `<span class='sh_${t.type_str()}'>` + source.slice(t.start, t.end) + "</span>"
                         prev_end = t.end
                     }
                 }
             }
 
-            s = s + el.innerText.slice(prev_end, el.innerText.length)
+            s = s + source.slice(prev_end, source.length)
 
-            s = s.replace(/[\n]/g, "<br>")
+            //s = s.replace(/[\n]/g, "<br>")
 
+            console.log("S")
             console.log(s)
 
             el.previousElementSibling.innerHTML = s
 
         }
 
-        document.querySelectorAll("[contenteditable]").forEach(el => {
-            el.addEventListener("input", () => highLite(el));
-            highLite(el);
+        document.querySelectorAll("[contenteditable]").forEach(ele => {
+            ele.addEventListener("input", () => highLite());
+            highLite();
         });
     </script>
 </body>
