@@ -20,7 +20,7 @@ class IRTranslator {
 		var method = "translate_" + String(node.constructor.name)
 		var translator = t[method]
 		if (translator === undefined) {
-			console.log("Error: Function '" + method + "' is not implemented")
+			throw new TranslateFunctionMissing(method)
 		}
 		return translator(t, node)
 	}
@@ -36,7 +36,7 @@ class IRTranslator {
 	}
 
 	translate_Anchor(t, node) {
-		console.log("Error: Anchors not implemented")
+		throw new NotImplemented("Anchors are not implemented")
 	}
 
 	translate_WordBoundary(t, node) {
@@ -81,10 +81,6 @@ class IRTranslator {
 
 	translate_Star(t, node) {
 		t.append("*")
-	}
-
-	translate_Empty(t, node) {
-		
 	}
 	
 }

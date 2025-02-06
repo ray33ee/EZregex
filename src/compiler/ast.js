@@ -38,8 +38,7 @@ class ASTNode {
 				} else if (this[key] instanceof ASTNode) {
 					s = this[key].display()
 				} else {
-                    //Error, unrecognised node
-                    console.log("Unknown token in ASTNode '" + this[key] + "' - " + typeof(this[key]))
+                    throw new UnrecognisedASTNode(this[key])
                 }
 
 				pairs += key + ": " + s + ", ";
@@ -144,29 +143,6 @@ class Intersection extends Expr {
     }
 }
 
-function parseRepetition(tokens) {
-    //Repetition: [NUMBER]?[RANGE][NUMBER]?
-
-    if (tokens.length == 1) {
-        //Single token, must be a range or a number
-        if (tokens[0].type == RANGE) {
-            return new Repetition()
-        } else if (tokens[0].type == INTEGER) {
-
-        } else {
-            //error
-        }
-
-
-    } else if (tokens.length == 2) {
-        //Two tokens, either a Number followed by a range, or a range followed by a number
-    } else if (tokens.length == 3) {
-        //Three tokens, a number a range then a number
-    }
-
-    //Either tokens is empty or contains more than 3 tokens. Either way this is invalid syntax
-}
-
 function parseExpr(tokens) {
 
     //Identifier, +, |, Characterset, Range, not, or, (, ), Quote
@@ -207,15 +183,13 @@ function parseExpr(tokens) {
             queue.push(new Complement(queue.pop()))
         } else if (popped.type == REPETITION) {
 
-            console.log(popped.data)
-
-            const r = new RegExp(/(?<min>[0-9]*)(?<range>(..)?)(?<max>[0-9]*)/);
+            const r = new RegExp(/^(?<min>[0-9]*)(?<range>(..)?)(?<max>[0-9]*)$/);
 
             const m = r.exec(popped.data)
 
             if (m == null) {
                 //Invalid repetition format, error
-                console.log("Error: Invalid repetition: '{" + popped.data + "}'")
+                throw new BadRepetition(popped)
             }
 
             min = m["groups"]["min"] == "" ? "" : Number(m["groups"]["min"])
@@ -225,9 +199,6 @@ function parseExpr(tokens) {
             if (m["groups"]["range"] == "") {
                 max = min;
             }
-
-            console.log(min)
-            console.log(max)
 
             queue.push(new Repetition(queue.pop(), min, max))
 
@@ -271,8 +242,7 @@ function parseExpr(tokens) {
             while (true) {
 
                 if (operator_stack.length == 0) {
-                    console.log("Error, mismatched parenthesis a");
-                    return null;
+                    throw new MismatchedParenthesis();
                 }
 
                 if (operator_stack[operator_stack.length - 1].type == LEFT_PARENTHESIS) {
@@ -289,17 +259,14 @@ function parseExpr(tokens) {
 
     for (let i = 0; i < operator_stack.length; i++) {
         if (operator_stack[operator_stack.length-1].type == LEFT_PARENTHESIS) {
-            console.log("Error, mismatched parenthesis b");
-            return null;    
+            throw new MismatchedParenthesis();   
         }
 
         pop_operator();
     }
 
     if (queue.length != 1) {
-        //error
-        console.log("Queue length is not one")
-        console.log(queue.length)
+        throw new ShuntingYardError(queue.length)
     }
 
     node = queue[0];
@@ -323,20 +290,17 @@ function parse(tokens) {
 
 
         if (line[0].type != IDENTIFIER && line[0].type != RETURN) {
-            //If the first token in each line isn't an identifier or return, error
-            console.log("the first token in each line isn't an identifier, error")
+            throw new InvalidFirstTokenStatement(line[0])
         }
 
         if (line.length == 1) {
-            //If there is only one token, errorv
-            console.log(" there is only one token, errorv")
+            throw new InvalidNumberOfTokens(line[0])
         }
 
         if (line[0].type == IDENTIFIER) {
 
             if (line[1].type != ASSIGNMENT) {
-                //If the second token after an identifier is anything but an assignment, error
-                console.log("the second token after an identifier is anything but an assignment, error")
+                throw new AssertAssignment(line[1])
             }
 
             const e = parseExpr(line.slice(2));
@@ -356,6 +320,7 @@ function parse(tokens) {
             statements.push(ret)
         } else {
             //error
+            throw new UnreachableCode()
         }
     }
 

@@ -11,8 +11,7 @@ const LEFT_PARENTHESIS = 11;
 const RIGHT_PARENTHESIS = 12;
 const STRING_QUOTE = 13;
 const RETURN = 14;
-
-
+const COMMENT = 99; //Used in syntax highlighting only
 
 
 class Token {
@@ -32,12 +31,13 @@ class Token {
 	}
 
 	type_str() {
+		
 		if (this.type == IDENTIFIER) {
 			return "Identifier"
 		} else if (this.type == ASSIGNMENT) {
 			return "Assignment"
 		} else if (this.type == CONCATENATION) {
-			return "Concatentation"
+			return "Concatenation"
 		} else if (this.type == ALTERNATION) {
 			return "Alternation"
 		} else if (this.type == CHARACTER_SET) {
@@ -57,8 +57,7 @@ class Token {
 		} else if (this.type == RETURN) {
 			return "Return"
 		} else {
-			//Unrecognised type, error
-			console.log("ERROR: Unrecognised token type '" + this.type + "'")
+			throw new UnrecognisedTokenType(this.type)
 		}
 	}
 }
@@ -99,7 +98,10 @@ function tokenise(source) {
 
 	back_slash_count = 0
 
+	var index = 0;
+
 	function send_token() {
+
 
 		if (current_token.isempty()) {
 			return
@@ -108,16 +110,19 @@ function tokenise(source) {
 		if (current_token.type == IDENTIFIER) {
 			if (current_token.data == "not") {
 				//current_token = new Token(NOT_KEYWORD, "")
+				current_token.end = index
 				current_token.type = NOT_KEYWORD
 				current_token.data = ""
 			} else if (current_token.data == "or") {
 				//current_token = new Token(OR_KEYWORD, "")
+				current_token.end = index
 				current_token.type = NOT_KEYWORD
 				current_token.data = ""
 			} else if (current_token.data == "return") {
 				//current_token = new Token(RETURN, "")
+				current_token.end = index
 				current_token.type = RETURN
-				current_token.data = ""
+				current_token.data = "";
 			}
 		}
 
@@ -127,12 +132,6 @@ function tokenise(source) {
 		current_token = new Token()
 	}
 
-	var index = 0;
-
-	console.log("split")
-	console.log("'" + source + "'")
-	console.log(split_lines(source))
-
 	for (line of split_lines(source)) {
 
 		for (char of line) {
@@ -141,8 +140,7 @@ function tokenise(source) {
 
 				if (char == "\"") {
 					if (back_slash_count % 2 == 0) {
-						current_token.end = current_token.data.length + current_token.start + 2
-						console.log(char)
+						current_token.end = index+1
 						send_token();
 						index++;
 						continue;
@@ -165,7 +163,7 @@ function tokenise(source) {
 
 				if (char == "]") {
 					if (back_slash_count % 2 == 0) {
-						current_token.end = current_token.data.length + current_token.start + 2
+						current_token.end = index+1
 						send_token();
 						index++;
 						continue;
@@ -186,7 +184,7 @@ function tokenise(source) {
 
 			if (current_token.type == REPETITION) {
 				if (char == "}") {
-					current_token.end = current_token.data.length + current_token.start + 2
+					current_token.end = index+1
 					send_token();
 					index++;
 					continue;
@@ -206,6 +204,7 @@ function tokenise(source) {
 			} else if (char.charCodeAt(0) >= "0".charCodeAt(0) && char.charCodeAt(0) <= "9".charCodeAt(0) || char.charCodeAt(0) >= "a".charCodeAt(0) && char.charCodeAt(0) <= "z".charCodeAt(0) || char.charCodeAt(0) >= "A".charCodeAt(0) && char.charCodeAt(0) <= "Z".charCodeAt(0) || char == "_") {
 				if (current_token.type != IDENTIFIER) {
 					send_token();
+					current_token.start = index
 					current_token.type = IDENTIFIER;
 				}
 				current_token.append_data(char)
@@ -229,10 +228,14 @@ function tokenise(source) {
 				send_token();
 			} else if (char == "(") {
 				send_token();
+				current_token.start = index
+				current_token.end = index+1
 				current_token.type = LEFT_PARENTHESIS;
 				send_token();
 			} else if (char == ")") {
 				send_token();
+				current_token.start = index
+				current_token.end = index+1
 				current_token.type = RIGHT_PARENTHESIS;
 				send_token();
 			} else if (char == "{") {

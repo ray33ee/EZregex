@@ -23,7 +23,7 @@ class SymbolVisitor extends NodeVisitor {
 
 	visit_Name(t, node) {
 		if (t.symbol_map[node.id] == undefined) {
-			console.log("Variable '" + node.id + "' is used before it is declared")
+			throw new UsedBeforeDeclared(node.id)
 		}
 		t.symbol_map[node.id].refs += 1
 	}

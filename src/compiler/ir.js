@@ -47,8 +47,7 @@ class IrNode {
 				} else if (this[key] instanceof IrNode) {
 					s = this[key].display()
 				} else {
-                    //Error, unrecognised node
-                    console.log("Unknown token in IrNode '" + this[key] + "' - " + typeof(this[key]))
+                    throw new UnrecognisedIRNode(this[key])
                 }
 
 				pairs += key + ": " + s + ", ";
@@ -210,8 +209,7 @@ class IrCreator extends NodeVisitor {
 			return t.wrap_named(node.id, t.symbol_map.get(node.id));
 			
 		} else {
-			//If control flow reaches here, a variable is used before it is defined, error
-			console.log("Variable '" + node.id + "' is used before it is declared")
+			throw new UndeclaredVariable(node.id)
 		}
 	}
 
@@ -263,11 +261,11 @@ class IrCreator extends NodeVisitor {
 	}
 
 	visit_Complement(t, node) {
-		console.lop("Character set complement not implemented yet")
+		throw new NotImplemented("Error: Character set complement not implemented yet")
 	}
 
 	visit_Intersection(t, node) {
-		console.lop("Character set intersection not implemented yet")
+		throw new NotImplemented("Error: Character set intersection not implemented yet")
 	}
 
 }

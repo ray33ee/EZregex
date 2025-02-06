@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EZRegex IDE</title>
     <style>
+        :root {
+          /* Syntax highlighting colors */
+          --operator-color: #e85d3b;
+          --repetition-color: #f59e47;
+          --keyword-color: #bc85d6;
+          --string-color: #68cf9d;
+          --characterset-color: #5293cb;
+        } 
         body {
             background-color: #1e1e1e;
             color: #ffffff;
@@ -94,6 +102,7 @@
         .highLite_editable {
           padding: 1rem;
           min-height: calc(100% - 2rem);
+          font-family:  "Lucida Console", "Courier New", monospace;
         }
 
         /* THE UNDERLAYING ONE WITH COLORS */
@@ -110,15 +119,23 @@
         .highLite_editable {
           position: relative;
           color: transparent; /* Make text invisible */
-          caret-color: black; /* But keep caret visible */
+          caret-color: white; /* But keep caret visible */
         }
         .highLite_editable:focus {
           outline: none;
         }
 
-        .hl_operator{ color: turquoise; }
-        .hl_string{ color: fuchsia; }
-        .hl_characters{ color: seagreen; }
+        .sh_Assignment{ color: var(--operator-color); }
+        .sh_Concatenation{ color: var(--operator-color); }
+        .sh_Alternation{ color: var(--operator-color); }
+        .sh_CharacterSet{ color: var(--characterset-color); }
+        .sh_Repetition{ color: var(--repetition-color); }
+        .sh_Not{ color: var(--keyword-color); }
+        .sh_Or{ color: var(--keyword-color); }
+        .sh_LeftParenthesis{ color: white; }
+        .sh_RightParenthesis{ color: white; }
+        .sh_String{ color: var(--string-color); }
+        .sh_Return{ color: var(--keyword-color); }
     </style>
 </head>
 <body>
@@ -137,8 +154,8 @@
     <div class="container">
         <!--<div id="source" class="text-area" contenteditable="true"></div>-->
         <div class="highLite">
-          <div class="highLite_colors"></div>
-          <div class="highLite_editable" contenteditable id="source"></div>
+          <div class="highLite_colors" spellcheck="false"></div>
+          <div class="highLite_editable" spellcheck="false" contenteditable id="source"></div>
         </div>
         <div class="tabular">
             <div class="tabs">
@@ -149,6 +166,7 @@
             <div id="scratch" class="output-area"><textarea id="scratch" class="text-area" rows="50" placeholder="Write your regex here..."></textarea></div>
         </div>
     </div>
+    <script type="text/javascript" src="./src/compiler/error.js"></script>
     <script type="text/javascript" src="./src/compiler/tokens.js"></script>
     <script type="text/javascript" src="./src/compiler/ast.js"></script>
     <script type="text/javascript" src="./src/compiler.js"></script>
@@ -169,7 +187,7 @@
             document.querySelectorAll('.tab').forEach(tabElement => {
                 tabElement.classList.remove('active');
             });
-            document.querySelector(".tab[onclick=\"switchTab('${tab}')\"]").classList.add('active');
+            document.querySelector(`.tab[onclick=\"switchTab('${tab}')\"]`).classList.add('active');
         }
 
         function consoleWrite(text) {
@@ -188,6 +206,8 @@
 
             tokens = tokenise(el.innerText)
 
+            console.log(tokens)
+
             index = 0;
 
             out = []
@@ -199,9 +219,8 @@
             for (token of tokens) {
                 for (t of token) {
                     if (t.start != -1 && t.end != -1) {
-                        console.log(t)
                         s = s + el.innerText.slice(prev_end, t.start)
-                        s = s + "<span class='hl_operator'>" + el.innerText.slice(t.start, t.end) + "</span>"
+                        s = s + `<span class='sh_${t.type_str()}'>` + el.innerText.slice(t.start, t.end) + "</span>"
                         prev_end = t.end
                     }
                 }
@@ -211,9 +230,9 @@
 
             s = s.replace(/[\n]/g, "<br>")
 
-            el.previousElementSibling.innerHTML = s
-
             console.log(s)
+
+            el.previousElementSibling.innerHTML = s
 
         }
 
