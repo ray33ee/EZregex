@@ -90,7 +90,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background-color: #0bf; border-radius: 1rem; }
 
-        .highLite{
+        .syntaxLite{
           width: 48%;
           border: 1px solid #888;
           position: relative;
@@ -98,8 +98,8 @@
           
         }
 
-        .highLite_colors,
-        .highLite_editable {
+        .syntaxLite_colors,
+        .syntaxLite_editable {
           padding: 1rem;
           min-height: calc(100% - 2rem);
           font-family:  "Lucida Console", "Courier New", monospace;
@@ -107,7 +107,7 @@
         }
 
         /* THE UNDERLAYING ONE WITH COLORS */
-        .highLite_colors {
+        .syntaxLite_colors {
           position: absolute;
           top: 0;
           right: 0;
@@ -117,12 +117,12 @@
         }
 
         /* THE OVERLAYING CONTENTEDITABLE WITH TRANSPARENT TEXT */
-        .highLite_editable {
+        .syntaxLite_editable {
           position: relative;
           color: transparent; /* Make text invisible */
           caret-color: white; /* But keep caret visible */
         }
-        .highLite_editable:focus {
+        .syntaxLite_editable:focus {
           outline: none;
         }
 
@@ -137,6 +137,15 @@
         .sh_RightParenthesis{ color: white; }
         .sh_String{ color: var(--string-color); }
         .sh_Return{ color: var(--keyword-color); }
+
+
+        .highlight-color {
+            background-color: #ffcc00;
+            color: #000000;
+        }
+        .highlight-color-alt {
+            background-color: #cc00ff;
+        }
     </style>
 </head>
 <body>
@@ -153,18 +162,22 @@
         </div>
     </header>
     <div class="container">
-        <!--<div id="source" class="text-area" contenteditable="true"></div>-->
-        <div class="highLite">
-          <div class="highLite_colors" spellcheck="false"></div>
-          <div class="highLite_editable" spellcheck="false" contenteditable id="source"></div>
+        <div class="syntaxLite">
+          <div class="syntaxLite_colors" spellcheck="false"></div>
+          <div class="syntaxLite_editable" spellcheck="false" contenteditable id="source"></div>
         </div>
         <div class="tabular">
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('console')">Console</div>
-                <div class="tab" onclick="switchTab('scratch')">Scratch</div>
+                <div class="tab" onclick="switchTab('scratch_w')">Scratch</div>
             </div>
             <div id="console" class="output-area active">Console Output<br></div>
-            <div id="scratch" class="output-area"><textarea id="scratch" class="text-area" rows="50" placeholder="Write your regex here..."></textarea></div>
+            <div id="scratch_w" class="output-area">
+                <div class="syntaxLite" style="width: 90%; height=90%;">
+                  <div class="syntaxLite_colors" spellcheck="false"></div>
+                  <div class="syntaxLite_editable" spellcheck="false" contenteditable id="scratch"></div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript" src="./src/compiler/error.js"></script>
@@ -181,9 +194,13 @@
     <script type="text/javascript" src="./src/compiler/translate.js"></script>
     <script>
 
-        const el = document.getElementById("source")
+        const source_element = document.getElementById("source")
+        const scratch_element = document.getElementById("scratch")
 
-        el.addEventListener("paste", (event) => { custom_paste(event) })
+        source_element.addEventListener("paste", (event) => { custom_paste(event) })
+        source_element.addEventListener("input", () => syntaxLite());
+
+        scratch_element.addEventListener("input", () => highlight());
 
         function switchTab(tab) {
             document.querySelectorAll('.output-area').forEach(div => {
@@ -214,13 +231,13 @@
         }
 
         // https://stackoverflow.com/questions/41884969/highlight-syntax-in-contenteditable
-        function highLite() {
+        function syntaxLite() {
             console.log("Inner HTML")
-            console.log("'" + el.innerHTML + "'")
-            console.log("'" + el.constructor.name + "'")
+            console.log("'" + source_element.innerHTML + "'")
+            console.log("'" + source_element.constructor.name + "'")
             console.log("done")
 
-            console.log(el.querySelectorAll("div"))
+            console.log(source_element.querySelectorAll("div"))
 
             source = ""
 
@@ -228,16 +245,16 @@
             //because when we undo this by calling innerText we get a different string. So we opt to create our own custom
             //innerText function which gets the source code in the correct format
 
-            console.log(el.innerHTML)
+            console.log(source_element.innerHTML)
 
-            div_count = el.querySelectorAll("div").length
+            div_count = source_element.querySelectorAll("div").length
 
             if (div_count == 0) {
-                source = el.innerText
+                source = source_element.innerText
             } else {
                 counter = 0
                 var last_div = null
-                for (div of el.querySelectorAll("div")) {
+                for (div of source_element.querySelectorAll("div")) {
                     source += div.innerText.replace(/[\n]/g, "") + (counter == div_count-1 ? "" : "\n")
                     counter++;
                     last_div = div
@@ -277,14 +294,18 @@
             console.log("S")
             console.log(s)
 
-            el.previousElementSibling.innerHTML = s
+            source_element.previousElementSibling.innerHTML = s
 
         }
 
-        document.querySelectorAll("[contenteditable]").forEach(ele => {
-            ele.addEventListener("input", () => highLite());
-            highLite();
-        });
+        function highlight() {
+
+
+            scratch_element.previousElementSibling.innerHTML = scratch_element.innerText.replace(/hell/g, (match, offset) => {
+                return `<span class='highlight-color'>${match}</span>`
+            } )
+        }
+
     </script>
 </body>
 </html>
