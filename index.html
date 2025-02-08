@@ -197,10 +197,13 @@
         const source_element = document.getElementById("source")
         const scratch_element = document.getElementById("scratch")
 
+        built_regex = "";
+
         source_element.addEventListener("paste", (event) => { custom_paste(event) })
         source_element.addEventListener("input", () => syntaxLite());
 
         scratch_element.addEventListener("input", () => highlight());
+        scratch_element.addEventListener("mousemove", (event) => mouseover_highlight(event));
 
         function switchTab(tab) {
             document.querySelectorAll('.output-area').forEach(div => {
@@ -291,18 +294,24 @@
 
             //s = s.replace(/[\n]/g, "<br>")
 
-            console.log("S")
-            console.log(s)
-
             source_element.previousElementSibling.innerHTML = s
 
         }
 
+        function mouseover_highlight(event) {
+            console.log("hello")
+            console.log(event)
+        }
+
         function highlight() {
 
+            count = 0
 
-            scratch_element.previousElementSibling.innerHTML = scratch_element.innerText.replace(/hell/g, (match, offset) => {
-                return `<span class='highlight-color'>${match}</span>`
+            const re = new RegExp(built_regex, "g");
+
+            scratch_element.previousElementSibling.innerHTML = scratch_element.innerText.replace(re, (match, offset) => {
+                count ++;
+                return `<span class='highlight-color${count % 2 == 0 ? "" : "-alt"}'>${match}</span>`
             } )
         }
 

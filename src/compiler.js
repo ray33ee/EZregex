@@ -37,5 +37,9 @@ function build() {
 
 	regex = translate(ir, new IRTranslator())
 
+	built_regex = regex;
+
+	highlight();
+
 	console.log(regex)
 }
